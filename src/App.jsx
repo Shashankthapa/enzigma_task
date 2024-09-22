@@ -1,13 +1,14 @@
-import './App.css'
+import "./App.css";
 import React, { useEffect, useState } from "react";
 
+const handleDisplay = () => {
+  const data = JSON.parse(localStorage.getItem("array"));
+  if (data) return data;
+  else return [];
+};
+
 function App() {
-
-  const [tasks, setTasks] = useState([
-    { id: 1, assignedTo: "User 1", status: "Completed", dueDate: "2024-07-12", priority: "Low", description: "This task is good" },
-    { id: 2, assignedTo: "User 2", status: "In Progress", dueDate: "2024-09-01", priority: "High", description: "This task is good" },
-  ]);
-
+  const [tasks, setTasks] = useState(handleDisplay());
   const [showNewTask, setShowNewTask] = useState(false);
   const [showEditTask, setShowEditTask] = useState(false);
   const [showDeleteTaskMsg, setShowDeleteTaskMsg] = useState(false);
@@ -18,19 +19,19 @@ function App() {
     assignedTo: "",
     status: "Not Started",
     dueDate: "",
-    priority: "Normal",
-    description: ""
+    priority: "Low",
+    description: "",
   });
 
   useEffect(() => {
-    console.log("show new task : " + JSON.stringify(newTask));
-  },[newTask])
+    localStorage.setItem("array", JSON.stringify(tasks));
+  }, [tasks]);
 
   //to update the new tab.
   const handleActionChange = (taskId, action) => {
-    if (action === 'edit') {
+    if (action === "edit") {
       setShowEditTask(true);
-      const taskToEdit = tasks.find(t => t.id === taskId);
+      const taskToEdit = tasks.find((t) => t.id === taskId);
       setNewTask({
         assignedTo: taskToEdit.assignedTo,
         status: taskToEdit.status,
@@ -39,36 +40,36 @@ function App() {
         description: taskToEdit.description,
       });
       setEditingTaskId(taskId);
-      
-    } else if (action === 'delete') {
+    } else if (action === "delete") {
       // Implement delete functionality
       setShowDeleteId(taskId);
       setShowDeleteTaskMsg(true);
     }
   };
 
-  //to change the new user.
+  //to change the data for every input.
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setNewTask({ ...newTask, [name]: value });
+    setNewTask((newTask) => ({ ...newTask, [name]: value }));
   };
 
   //to save the new user.
   const handleSave = () => {
-    setTasks([...tasks, { ...newTask, id: tasks.length + 1 }]);
+    setTasks((prev) => [...prev, { ...newTask, id: tasks.length + 1 }]);
     // assign the new task to empty all the values of the object.
     setNewTask({
       assignedTo: "",
       status: "",
       dueDate: "",
       priority: "",
-      description: ""
+      description: "",
     });
+
     setShowNewTask(false);
   };
 
   const handleUpdate = () => {
-    const updatedTasks = tasks.map(task =>
+    const updatedTasks = tasks.map((task) =>
       task.id === editingTaskId ? { ...task, ...newTask } : task
     );
     setTasks(updatedTasks);
@@ -76,11 +77,10 @@ function App() {
   };
 
   const handleDelete = (id) => {
-    const newTaskArray = tasks.filter(t => t.id != id);
+    const newTaskArray = tasks.filter((t) => t.id != id);
     setTasks(newTaskArray);
     setShowDeleteTaskMsg(false);
-  }
-
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -91,7 +91,6 @@ function App() {
       >
         New Task
       </button>
-
       <table className="min-w-full table-auto mt-4">
         <thead className="bg-gray-100">
           <tr>
@@ -103,28 +102,29 @@ function App() {
           </tr>
         </thead>
         <tbody>
-          {tasks.map((task) => (
-            <tr key={task.id} className="border-t">
-              <td className="px-4 py-2">{task.assignedTo}</td>
-              <td className="px-4 py-2">{task.status}</td>
-              <td className="px-4 py-2">{task.dueDate}</td>
-              <td className="px-4 py-2">{task.priority}</td>
-              <td className="px-4 py-2">{task.description}</td>
-              <td className="px-4 py-2">
-                <select
-                  onClick={(e) => {
-                    handleActionChange(task.id, e.target.value)
-                  
-                  }}
-                  className="border border-gray-300 rounded px-2 py-1"
-                >
-                  <option value = ""></option>
-                  <option value = "edit">Edit</option>
-                  <option value = "delete">Delete</option>
-                </select>
-              </td>
-            </tr>
-          ))}
+          {tasks
+            ? tasks.map((task) => (
+                <tr key={task.id} className="border-t">
+                  <td className="px-4 py-2">{task.assignedTo}</td>
+                  <td className="px-4 py-2">{task.status}</td>
+                  <td className="px-4 py-2">{task.dueDate}</td>
+                  <td className="px-4 py-2">{task.priority}</td>
+                  <td className="px-4 py-2">{task.description}</td>
+                  <td className="px-4 py-2">
+                    <select
+                      onClick={(e) => {
+                        handleActionChange(task.id, e.target.value);
+                      }}
+                      className="border border-gray-300 rounded px-2 py-1"
+                    >
+                      <option value=""></option>
+                      <option value="edit">Edit</option>
+                      <option value="delete">Delete</option>
+                    </select>
+                  </td>
+                </tr>
+              ))
+            : ""}
         </tbody>
       </table>
 
@@ -149,7 +149,8 @@ function App() {
                 <select
                   name="status"
                   className="w-full border border-gray-300 rounded px-3 py-2"
-                  value={newTask.status}
+                  defaultValue="Not Started"
+                  // value={newTask.status}
                   onChange={handleChange}
                 >
                   <option>Not Started</option>
@@ -173,6 +174,7 @@ function App() {
                   name="priority"
                   className="w-full border border-gray-300 rounded px-3 py-2"
                   value={newTask.priority}
+                  defaultValue="Low"
                   onChange={handleChange}
                 >
                   <option>Low</option>
@@ -208,9 +210,8 @@ function App() {
         </div>
       )}
 
-
       {showEditTask && (
- <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-auto">
             <h2 className="text-xl font-bold mb-4">Edit Task</h2>
             <form>
@@ -224,7 +225,7 @@ function App() {
                   onChange={handleChange}
                 />
               </div>
-               
+
               <div className="mb-4">
                 <label className="block mb-2">Status</label>
                 <select
@@ -286,40 +287,40 @@ function App() {
               </button>
             </div>
           </div>
-        </div> 
+        </div>
+      )}
 
-)}
+      {showDeleteTaskMsg && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-auto">
+            <h2 className="text-xl font-bold mb-4">Delete Task</h2>
 
-{
-  showDeleteTaskMsg && (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-auto">
-        <h2 className="text-xl font-bold mb-4">Delete Task</h2>
-      
-      <div className = "mt-4">
-        <h2>Do you want to delete {showDeleteId ? showDeleteId : ""}nd id?</h2> 
-      </div>
-      <div className="flex justify-end space-x-2">
-        <button
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-          onClick={() => setShowDeleteTaskMsg(false)}
-        >
-          No
-        </button>
-        <button
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-          onClick={() => { showDeleteId ? handleDelete(showDeleteId) : ""}}
-        >
-          Yes 
-        </button>
-      </div>
-      </div>
+            <div className="mt-4">
+              <h2>
+                Do you want to delete {showDeleteId ? showDeleteId : ""}nd id?
+              </h2>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <button
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                onClick={() => setShowDeleteTaskMsg(false)}
+              >
+                No
+              </button>
+              <button
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                onClick={() => {
+                  showDeleteId ? handleDelete(showDeleteId) : "";
+                }}
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  )
-}
-</div>
-);
+  );
 }
 
-
-export default App
+export default App;
