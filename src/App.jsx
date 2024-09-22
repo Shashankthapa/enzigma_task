@@ -56,6 +56,14 @@ function App() {
   //to save the new user.
   const handleSave = () => {
     setTasks([...tasks, { ...newTask, id: tasks.length + 1 }]);
+    // assign the new task to empty all the values of the object.
+    setNewTask({
+      assignedTo: "",
+      status: "",
+      dueDate: "",
+      priority: "",
+      description: ""
+    });
     setShowNewTask(false);
   };
 
@@ -104,7 +112,10 @@ function App() {
               <td className="px-4 py-2">{task.description}</td>
               <td className="px-4 py-2">
                 <select
-                  onChange={(e) => handleActionChange(task.id, e.target.value)}
+                  onClick={(e) => {
+                    handleActionChange(task.id, e.target.value)
+                  
+                  }}
                   className="border border-gray-300 rounded px-2 py-1"
                 >
                   <option value = ""></option>
